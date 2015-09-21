@@ -17,14 +17,20 @@ SOURCES += main.cpp\
     logindialog.cpp \
     tool.cpp \
     readerdialog.cpp \
-    usrinformation.cpp
+    usrinformation.cpp \
+    borrowhistory.cpp \
+    admindialog.cpp
 
 HEADERS  += \
     logindialog.h \
     tool.h \
     readerdialog.h \
-    usrinformation.h
+    usrinformation.h \
+    borrowhistory.h \
+    admindialog.h
 
 FORMS    += \
     logindialog.ui \
-    readerdialog.ui
+    readerdialog.ui \
+    borrowhistory.ui \
+    admindialog.ui
