@@ -19,7 +19,8 @@ SOURCES += main.cpp\
     readerdialog.cpp \
     usrinformation.cpp \
     borrowhistory.cpp \
-    admindialog.cpp
+    admindialog.cpp \
+    addbookdialog.cpp
 
 HEADERS  += \
     logindialog.h \
@@ -27,10 +28,12 @@ HEADERS  += \
     readerdialog.h \
     usrinformation.h \
     borrowhistory.h \
-    admindialog.h
+    admindialog.h \
+    addbookdialog.h
 
 FORMS    += \
     logindialog.ui \
     readerdialog.ui \
     borrowhistory.ui \
-    admindialog.ui
+    admindialog.ui \
+    addbookdialog.ui

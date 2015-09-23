@@ -3,6 +3,7 @@
 #include "tool.h"
 #include "usrinformation.h"
 #include "readerdialog.h"
+#include "admindialog.h"
 #include <QDebug>
 
 LoginDialog::LoginDialog(QWidget *parent) :
@@ -97,11 +98,12 @@ void LoginDialog::on_login_2_clicked()
     query.bindValue(":pwd",pwd);
     query.exec();
     if(query.next()){
-        QString name = query.value(1).toString();
-        qDebug()<<name;
+        AdminDialog *adminDialog = new AdminDialog;
+        adminDialog->show();
+        this->close();
     }
     else{
         QMessageBox::about(NULL,"提示","账号或密码错误");
-        ui->le2->setText("");
+        ui->le2_2->setText("");
     }
 }

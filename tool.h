@@ -2,6 +2,7 @@
 #define TOOL_H
 #include<QtSql>
 #include<QMessageBox>
+#include<QStringList>
 
 class Tool
 {
@@ -12,7 +13,10 @@ public:
 
     QSqlDatabase getDb() const;
 
+
+    QStringList getBookClass();
 private:
+    QStringList bookClass;
     static Tool *instance;
     QSqlDatabase db;
 };
