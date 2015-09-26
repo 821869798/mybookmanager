@@ -32,11 +32,42 @@ private slots:
 
     void on_bqueryBtn_clicked();
 
+    void on_dateQueryBtn_clicked();
+
+    void on_pushButton_2_clicked();
+
+    void on_loseBookBtn_clicked();
+
+    void on_pushButton_clicked();
+
+    void on_bookReaderBtn_clicked();
+
+    void on_loseQueryBtn_clicked();
+
+    void on_borrowAddBtn_clicked();
+
+    void on_tabWidget_currentChanged(int index);
+
+    void on_readerQueryBtn_clicked();
+
+    void on_arrearsQueryBtn_clicked();
+
+    void on_clearReaderQuery_clicked();
+
+    void on_arrearsQueryBtn_2_clicked();
+
+    void on_alreadyBorrowQuery_clicked();
+
+    void on_readerUpgrade_clicked();
+
+    void on_clearReaderEdit_clicked();
+
 private:
     Ui::AdminDialog *ui;
     void init();
     void initBookTableView();
     void initBorrowTableView();
+    void initReaderTableView();
 };
 
 #endif // ADMINDIALOG_H

@@ -3,6 +3,7 @@
 #include "tool.h"
 #include "usrinformation.h"
 #include "addbookdialog.h"
+#include "tempquerydialog.h"
 #include <QtSql>
 
 AdminDialog::AdminDialog(QWidget *parent) :
@@ -32,12 +33,21 @@ void AdminDialog::initBookTableView()
     ui->tv1->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
 
+void AdminDialog::initReaderTableView()
+{
+    QSqlQueryModel *model = new QSqlQueryModel;
+    model->setQuery("select rid as 读者编号,name as 姓名,sex as 性别,case type when 0 then '普通用户' else '高级用户' end as 类型,bornum as 借阅数量,arrears as 欠款金额 from reader;");
+    ui->tv2->setModel(model);
+}
+
 void AdminDialog::initBorrowTableView()
 {
     QSqlTableModel *model = new QSqlTableModel(this,Tool::getInstance()->getDb());
     model->setTable("borrow");
     model->setEditStrategy(QSqlTableModel::OnManualSubmit);
     model->select(); //选取整个表的所有行
+    model->setFilter("isreturn=0");
+    model->removeColumn(model->columnCount()-1);
     model->removeColumn(model->columnCount()-1);
     model->setHeaderData(0,Qt::Horizontal,"借阅编号");
     model->setHeaderData(1,Qt::Horizontal,"图书编号");
@@ -45,7 +55,6 @@ void AdminDialog::initBorrowTableView()
     model->setHeaderData(3,Qt::Horizontal,"剩余续借次数");
     model->setHeaderData(4,Qt::Horizontal,"借阅时间");
     model->setHeaderData(5,Qt::Horizontal,"应还时间");
-    model->setFilter("isreturn=0");
     ui->tv3->setModel(model);
     ui->tv3->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
@@ -63,6 +72,7 @@ void AdminDialog::init()
     }
     initBookTableView();
     initBorrowTableView();
+    initReaderTableView();
 }
 
 AdminDialog::~AdminDialog()
@@ -105,6 +115,7 @@ void AdminDialog::on_clearBtn_clicked()
     ui->bnameEdit->setText("");
     ui->authorEdit->setText("");
     ui->bclass->setCurrentIndex(0);
+    initBookTableView();
 }
 
 void AdminDialog::on_submitBtn1_clicked()
@@ -201,4 +212,219 @@ void AdminDialog::on_bqueryBtn_clicked()
     QSqlQueryModel*model = new QSqlQueryModel;
     model->setQuery(sql);
     ui->tv3->setModel(model);
+}
+
+void AdminDialog::on_dateQueryBtn_clicked()
+{
+    QString sql = "select * from borrow where isreturn=0 and ";
+    QString boid = ui->boidEdit->text();
+    QString bid = ui->bobidEdit->text();
+    QString rid = ui->boridEdit->text();
+    QString date1 = ui->botimeEdit1->date().toString("yyyy-MM-dd");
+    QString date2 = ui->botimeEdit2->date().toString("yyyy-MM-dd");
+    if(boid!="")
+    {
+        sql += "boid like '%"+boid+"%' and ";
+    }
+    if(bid!="")
+    {
+        sql += "bid like '%"+bid+"%' and ";
+    }
+    if(rid!="")
+    {
+        sql += "rid like '%"+rid+"%' and ";
+    }
+    sql += "botime>'"+date1+"' and botime<'"+date2+"' and ";
+    sql =  sql.left(sql.size()-5);
+    QSqlQueryModel*model = new QSqlQueryModel;
+    model->setQuery(sql);
+    ui->tv3->setModel(model);
+}
+
+void AdminDialog::on_pushButton_2_clicked()
+{
+    QString date = QDate::currentDate().toString("yyyy-MM-dd");
+    QSqlQueryModel *model = new QSqlQueryModel;
+    QString sql = "select boid,bid,rid,overbor,botime,retime from borrow where isreturn=0 and retime<'"+date+"';";
+    model->setQuery(sql);
+    model->setHeaderData(0,Qt::Horizontal,"借阅编号");
+    model->setHeaderData(1,Qt::Horizontal,"图书编号");
+    model->setHeaderData(2,Qt::Horizontal,"读者编号");
+    model->setHeaderData(3,Qt::Horizontal,"剩余续借次数");
+    model->setHeaderData(4,Qt::Horizontal,"借阅时间");
+    model->setHeaderData(5,Qt::Horizontal,"应还时间");
+    ui->tv3->setModel(model);
+}
+
+void AdminDialog::on_loseBookBtn_clicked()
+{
+    int row = ui->tv3->currentIndex().row();
+    if(row>=0){
+        QModelIndex index = ui->tv3->model()->index(row,1);
+        QModelIndex index1 = ui->tv3->model()->index(row,2);
+        QModelIndex index2 = ui->tv3->model()->index(row,0);
+        QString boid = ui->tv3->model()->data(index2).toString();
+        QString bid = ui->tv3->model()->data(index).toString();
+        QString rid = ui->tv3->model()->data(index1).toString();
+        QSqlQuery query(Tool::getInstance()->getDb());
+        query.exec("select price from book where bid='"+bid+"';");
+        query.next();
+        QString price = QString::number(query.value(0).toDouble()*2);
+        query.exec("update book set allnum=allnum-1 where bid='"+bid+"';");
+        query.exec("update borrow set isreturn=1,islose=1 where boid="+boid);
+        query.exec("update reader set arrears=arrears+"+price+" where rid='"+rid+"';");
+        QMessageBox::about(NULL,"提示","添加图书遗失成功");
+        initBorrowTableView();
+    }
+}
+
+void AdminDialog::on_pushButton_clicked()
+{
+
+}
+
+void AdminDialog::on_bookReaderBtn_clicked()
+{
+    int row = ui->tv1->currentIndex().row();
+    if(row>=0){
+        QModelIndex index = ui->tv1->model()->index(row,0);
+        QString bid = ui->tv1->model()->data(index).toString();
+        QString sql = "select reader.rid as 读者编号,reader.name as 读者姓名,reader.sex as性别,reader.bornum as  借书数量 from reader,borrow,book where book.bid=borrow.bid and reader.rid=borrow.rid and book.bid='"+bid+"';";
+        TempQueryDialog *tempquery = new TempQueryDialog(sql);
+        tempquery->show();
+    }
+
+}
+
+void AdminDialog::on_loseQueryBtn_clicked()
+{
+    QSqlQueryModel *model = new QSqlQueryModel;
+    model->setQuery("select borrow.boid as 借阅编号,book.bid as 图书编号,book.bname as 书名,reader.rid as 读者编号,reader.name as 读者姓名 from book,borrow,reader where book.bid=borrow.bid and reader.rid=borrow.rid and islose=1");
+    ui->tv3->setModel(model);
+}
+
+void AdminDialog::on_borrowAddBtn_clicked()
+{
+    QAbstractItemModel *model = ui->tv3->model();
+    for(int i=0;i<model->rowCount();i++)
+    {
+        QModelIndex index = ui->tv1->model()->index(i,0);
+        QString boid = ui->tv1->model()->data(index).toString();
+        QSqlQuery query(Tool::getInstance()->getDb());
+        query.exec("update borrow set overbor=overbor+1 wherer boid="+boid);
+    }
+    if(model->rowCount()>0){
+        QMessageBox::about(NULL,"提示","增加续借次数成功！");
+    }
+}
+
+void AdminDialog::on_tabWidget_currentChanged(int index)
+{
+    if(index==0){
+        initBookTableView();
+    }
+    else if(index==1){
+        initReaderTableView();
+    }
+    else{
+        initBorrowTableView();
+    }
+}
+
+void AdminDialog::on_readerQueryBtn_clicked()
+{
+    QString sql = "select rid as 读者编号,name as 姓名,sex as 性别,case type when 0 then '普通用户' else '高级用户' end as 类型,bornum as 借阅数量,arrears as 欠款金额 from reader where 1=1 and ";
+    QString rid = ui->ridEdit->text();
+    QString rname = ui->rnameEdit->text();
+    QString rtype = ui->rtypeEdit->currentText();
+    if(rid!="")
+    {
+        sql += "rid='"+rid+"' and ";
+    }
+    if(rname!="")
+    {
+        sql += "name like '%"+rname+"%' and ";
+    }
+    if(rtype!="无")
+    {
+        if(rtype=="普通用户")
+        {
+            sql += "type=0 and ";
+        }
+        else
+        {
+            sql += "type>0 and ";
+        }
+    }
+    sql =  sql.left(sql.size()-5);
+    QSqlQueryModel*model = new QSqlQueryModel;
+    model->setQuery(sql);
+    ui->tv2->setModel(model);
+}
+
+void AdminDialog::on_arrearsQueryBtn_clicked()
+{
+    QSqlQueryModel *model = new QSqlQueryModel;
+    model->setQuery("select rid as 读者编号,name as 姓名,sex as 性别,case type when 0 then '普通用户' else '高级用户' end as 类型,bornum as 借阅数量,arrears as 欠款金额 from reader where arrears>0;");
+    ui->tv2->setModel(model);
+}
+
+void AdminDialog::on_clearReaderQuery_clicked()
+{
+    initReaderTableView();
+}
+
+void AdminDialog::on_arrearsQueryBtn_2_clicked()
+{
+    int row = ui->tv2->currentIndex().row();
+    if(row>=0){
+        QModelIndex index = ui->tv2->model()->index(row,0);
+        QString rid = ui->tv2->model()->data(index).toString();
+        QSqlQuery query(Tool::getInstance()->getDb());
+        query.exec("update reader set arrears=0 where rid='"+rid+"';");
+        QMessageBox::about(NULL,"提示","清除成功");
+        initReaderTableView();
+    }
+}
+
+void AdminDialog::on_alreadyBorrowQuery_clicked()
+{
+    int row = ui->tv2->currentIndex().row();
+    if(row>=0){
+        QModelIndex index = ui->tv2->model()->index(row,0);
+        QString rid = ui->tv2->model()->data(index).toString();
+        QString sql = "select borrow.boid as 借阅编号,book.bid as 图书编号,book.bname as 书名,book.author as 作者,book.classnum as 分类,borrow.botime as 借阅时间 from reader,borrow,book where book.bid=borrow.bid and reader.rid=borrow.rid and borrow.isreturn=0 and reader.rid='"+rid+"';";
+        TempQueryDialog *tempquery = new TempQueryDialog(sql);
+        tempquery->show();
+    }
+}
+
+void AdminDialog::on_readerUpgrade_clicked()
+{
+    int row = ui->tv2->currentIndex().row();
+    if(row>=0){
+        QModelIndex index = ui->tv2->model()->index(row,0);
+        QString rid = ui->tv2->model()->data(index).toString();
+        QSqlQuery query(Tool::getInstance()->getDb());
+        query.exec("select type from reader where rid='"+rid);
+        query.next();
+        int type = query.value(0).toInt();
+        if(type==0)
+        {
+            query.exec("update reader set type=1 where rid='"+rid+"';");
+            qDebug()<<query.lastQuery();
+            QMessageBox::about(NULL,"提示","用户升级成功");
+            initReaderTableView();
+        }
+        else{
+            QMessageBox::about(NULL,"提示","已是高级用户");
+        }
+    }
+}
+
+void AdminDialog::on_clearReaderEdit_clicked()
+{
+    ui->ridEdit->setText("");
+    ui->rnameEdit->setText("");
+    ui->rtypeEdit->setCurrentIndex(0);
 }

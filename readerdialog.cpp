@@ -45,6 +45,7 @@ void ReaderDialog::initBorrowTableView()
     model->select(); //选取整个表的所有行
     model->setFilter("isreturn=0");
     model->removeColumn(model->columnCount()-1);
+    model->removeColumn(model->columnCount()-1);
     model->removeColumn(2);
     model->setHeaderData(0,Qt::Horizontal,"借书编号");
     model->setHeaderData(1,Qt::Horizontal,"图书编号");
@@ -62,11 +63,7 @@ void ReaderDialog::initReader()
     query.next();
     ui->ridLabel->setText(query.value(0).toString());
     ui->nameLabel->setText(query.value(2).toString());
-    if(query.value(3).toInt()==0){
-        ui->sexLabel->setText("男");
-    }else{
-        ui->sexLabel->setText("女");
-    }
+    ui->sexLabel->setText(query.value(3).toString());
     if(query.value(4).toInt()==0){
         ui->typeLabel->setText("普通用户");
     }else{

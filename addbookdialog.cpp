@@ -47,7 +47,7 @@ void AddBookDialog::on_submitBtn_clicked()
     {
         QMessageBox::about(NULL,"提示","图书数量错误！");
     }
-    QSqlQuery query(Tool::getInstance()->getDb());\
+    QSqlQuery query(Tool::getInstance()->getDb());
     query.prepare("insert into book values(:bid,:bname,:author,:press,:pub,:price,:bclass,:allnum,:nownum);");
     query.bindValue(":bid",bid);
     query.bindValue(":bname",bname);
