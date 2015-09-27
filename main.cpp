@@ -1,5 +1,4 @@
 #include "logindialog.h"
-#include "readerdialog.h"
 #include <QApplication>
 
 int main(int argc, char *argv[])

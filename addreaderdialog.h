@@ -15,6 +15,9 @@ public:
     explicit AddReaderDialog(QWidget *parent = 0);
     ~AddReaderDialog();
 
+private slots:
+    void on_submitBtn_clicked();
+
 private:
     Ui::AddReaderDialog *ui;
 };

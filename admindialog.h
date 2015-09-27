@@ -38,8 +38,6 @@ private slots:
 
     void on_loseBookBtn_clicked();
 
-    void on_pushButton_clicked();
-
     void on_bookReaderBtn_clicked();
 
     void on_loseQueryBtn_clicked();
@@ -61,6 +59,12 @@ private slots:
     void on_readerUpgrade_clicked();
 
     void on_clearReaderEdit_clicked();
+
+    void on_addReaderBtn_clicked();
+
+    void on_losepasswdBtn_clicked();
+
+    void on_deleteBookBtn_clicked();
 
 private:
     Ui::AdminDialog *ui;

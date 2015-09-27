@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>查询窗体</string>
   </property>
   <widget class="QTreeView" name="tv">
    <property name="geometry">

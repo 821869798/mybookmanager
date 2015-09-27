@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="tab">
     <attribute name="title">
@@ -193,7 +193,7 @@
       <string> 续借图书</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="returnBook">
+    <widget class="QPushButton" name="returnBtn">
      <property name="geometry">
       <rect>
        <x>410</x>

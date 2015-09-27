@@ -43,7 +43,7 @@ void ReaderDialog::initBorrowTableView()
     model->setTable("borrow");
     model->setEditStrategy(QSqlTableModel::OnManualSubmit);
     model->select(); //选取整个表的所有行
-    model->setFilter("isreturn=0");
+    model->setFilter("isreturn=0 and rid='"+UsrInformation::getInstance()->id+"'");
     model->removeColumn(model->columnCount()-1);
     model->removeColumn(model->columnCount()-1);
     model->removeColumn(2);
@@ -104,7 +104,15 @@ int ReaderDialog::getBookNum(QString bid){
 
 void ReaderDialog::on_borrowBtn_clicked()
 {
-
+    QSqlQuery query(Tool::getInstance()->getDb());
+    query.exec("select bornum from reader where rid='"+UsrInformation::getInstance()->id+"';");
+    query.next();
+    int num = query.value(0).toInt();
+    if(num>=15)
+    {
+        QMessageBox::about(NULL,"提示","借书失败，借书数量已达上限");
+        return ;
+    }
     int row = ui->tv1->currentIndex().row();
     if(row>=0){
         QModelIndex index = ui->tv1->model()->index(row,0);

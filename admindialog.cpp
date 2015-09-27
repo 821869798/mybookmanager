@@ -4,6 +4,7 @@
 #include "usrinformation.h"
 #include "addbookdialog.h"
 #include "tempquerydialog.h"
+#include "addreaderdialog.h"
 #include <QtSql>
 
 AdminDialog::AdminDialog(QWidget *parent) :
@@ -211,6 +212,14 @@ void AdminDialog::on_bqueryBtn_clicked()
     sql =  sql.left(sql.size()-5);
     QSqlQueryModel*model = new QSqlQueryModel;
     model->setQuery(sql);
+    model->removeColumn(model->columnCount()-1);
+    model->removeColumn(model->columnCount()-1);
+    model->setHeaderData(0,Qt::Horizontal,"借阅编号");
+    model->setHeaderData(1,Qt::Horizontal,"图书编号");
+    model->setHeaderData(2,Qt::Horizontal,"读者编号");
+    model->setHeaderData(3,Qt::Horizontal,"剩余续借次数");
+    model->setHeaderData(4,Qt::Horizontal,"借阅时间");
+    model->setHeaderData(5,Qt::Horizontal,"应还时间");
     ui->tv3->setModel(model);
 }
 
@@ -238,6 +247,14 @@ void AdminDialog::on_dateQueryBtn_clicked()
     sql =  sql.left(sql.size()-5);
     QSqlQueryModel*model = new QSqlQueryModel;
     model->setQuery(sql);
+    model->removeColumn(model->columnCount()-1);
+    model->removeColumn(model->columnCount()-1);
+    model->setHeaderData(0,Qt::Horizontal,"借阅编号");
+    model->setHeaderData(1,Qt::Horizontal,"图书编号");
+    model->setHeaderData(2,Qt::Horizontal,"读者编号");
+    model->setHeaderData(3,Qt::Horizontal,"剩余续借次数");
+    model->setHeaderData(4,Qt::Horizontal,"借阅时间");
+    model->setHeaderData(5,Qt::Horizontal,"应还时间");
     ui->tv3->setModel(model);
 }
 
@@ -278,11 +295,6 @@ void AdminDialog::on_loseBookBtn_clicked()
     }
 }
 
-void AdminDialog::on_pushButton_clicked()
-{
-
-}
-
 void AdminDialog::on_bookReaderBtn_clicked()
 {
     int row = ui->tv1->currentIndex().row();
@@ -308,13 +320,14 @@ void AdminDialog::on_borrowAddBtn_clicked()
     QAbstractItemModel *model = ui->tv3->model();
     for(int i=0;i<model->rowCount();i++)
     {
-        QModelIndex index = ui->tv1->model()->index(i,0);
-        QString boid = ui->tv1->model()->data(index).toString();
+        QModelIndex index = ui->tv3->model()->index(i,0);
+        QString boid = ui->tv3->model()->data(index).toString();
         QSqlQuery query(Tool::getInstance()->getDb());
-        query.exec("update borrow set overbor=overbor+1 wherer boid="+boid);
+        query.exec("update borrow set overbor=overbor+1 where boid="+boid);
     }
     if(model->rowCount()>0){
         QMessageBox::about(NULL,"提示","增加续借次数成功！");
+        initBorrowTableView();
     }
 }
 
@@ -427,4 +440,48 @@ void AdminDialog::on_clearReaderEdit_clicked()
     ui->ridEdit->setText("");
     ui->rnameEdit->setText("");
     ui->rtypeEdit->setCurrentIndex(0);
+}
+
+
+void AdminDialog::on_addReaderBtn_clicked()
+{
+    AddReaderDialog *addreader = new AddReaderDialog;
+    addreader->show();
+}
+
+void AdminDialog::on_losepasswdBtn_clicked()
+{
+    int row = ui->tv2->currentIndex().row();
+    if(row>=0){
+        QModelIndex index = ui->tv2->model()->index(row,0);
+        QString rid = ui->tv2->model()->data(index).toString();
+        QSqlQuery query(Tool::getInstance()->getDb());
+        query.exec("update reader set pwd='123456' where rid='"+rid+"';");
+        QMessageBox::about(NULL,"提示","密码初始化成功");
+    }
+}
+
+void AdminDialog::on_deleteBookBtn_clicked()
+{
+    int row = ui->tv1->currentIndex().row();
+    if(row>=0){
+        QMessageBox::StandardButton rb = QMessageBox::information(NULL, "警告", "是否删除该书,该操作不可还原", QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+        if(rb == QMessageBox::Yes)
+        {
+            QModelIndex index = ui->tv1->model()->index(row,0);
+            QString bid = ui->tv1->model()->data(index).toString();
+            QSqlQuery query(Tool::getInstance()->getDb());
+            QSqlQuery query1(Tool::getInstance()->getDb());
+            query.exec("PRAGMA foreign_keys = ON");
+            query.exec("select reader.rid,count(*) from borrow,book,reader where borrow.bid=book.bid and borrow.rid=reader.rid and borrow.isreturn=0 and borrow.bid='"+bid+"' group by borrow.bid,borrow.rid;");
+            while(query.next()){
+                QString rid = query.value(0).toString();
+                int num = query.value(1).toInt();
+                query1.exec("update reader set bornum=bornum-"+QString::number(num)+" where rid='"+rid+"';");
+            }
+            query.exec("delete from book where bid='"+bid+"';");
+            QMessageBox::about(NULL,"提示","删除该书成功");
+            initBookTableView();
+        }
+    }
 }
