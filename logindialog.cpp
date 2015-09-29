@@ -98,6 +98,7 @@ void LoginDialog::on_login_2_clicked()
     query.bindValue(":pwd",pwd);
     query.exec();
     if(query.next()){
+        UsrInformation::getInstance()->type = query.value(2).toInt();
         AdminDialog *adminDialog = new AdminDialog;
         adminDialog->show();
         this->close();

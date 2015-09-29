@@ -62,6 +62,12 @@ void AdminDialog::initBorrowTableView()
 
 void AdminDialog::init()
 {
+    if(UsrInformation::getInstance()->type==0)
+    {
+        ui->deleteBookBtn->setDisabled(true);
+        ui->readerUpgrade->setDisabled(true);
+        ui->borrowAddBtn->setDisabled(true);
+    }
     ui->bidAdd->setDisabled(true);
     ui->bnumAdd->setValidator(new QIntValidator(0,1000,this));
     ui->priceAdd->setValidator(new QDoubleValidator(0,1000 ,2,this));
