@@ -68,6 +68,7 @@ void AdminDialog::init()
         ui->readerUpgrade->setDisabled(true);
         ui->borrowAddBtn->setDisabled(true);
     }
+    ui->informationEdit->setMaxLength(50);
     ui->bidAdd->setDisabled(true);
     ui->bnumAdd->setValidator(new QIntValidator(0,1000,this));
     ui->priceAdd->setValidator(new QDoubleValidator(0,1000 ,2,this));
@@ -295,7 +296,7 @@ void AdminDialog::on_loseBookBtn_clicked()
         QString price = QString::number(query.value(0).toDouble()*2);
         query.exec("update book set allnum=allnum-1 where bid='"+bid+"';");
         query.exec("update borrow set isreturn=1,islose=1 where boid="+boid);
-        query.exec("update reader set arrears=arrears+"+price+" where rid='"+rid+"';");
+        query.exec("update reader set bornum=bornum-1,arrears=arrears+"+price+" where rid='"+rid+"';");
         QMessageBox::about(NULL,"提示","添加图书遗失成功");
         initBorrowTableView();
     }
@@ -307,7 +308,7 @@ void AdminDialog::on_bookReaderBtn_clicked()
     if(row>=0){
         QModelIndex index = ui->tv1->model()->index(row,0);
         QString bid = ui->tv1->model()->data(index).toString();
-        QString sql = "select reader.rid as 读者编号,reader.name as 读者姓名,reader.sex as性别,reader.bornum as  借书数量 from reader,borrow,book where book.bid=borrow.bid and reader.rid=borrow.rid and book.bid='"+bid+"';";
+        QString sql = "select reader.rid as 读者编号,reader.name as 读者姓名,reader.sex as性别,borrow.overbor as  续借次数 from reader,borrow,book where book.bid=borrow.bid and reader.rid=borrow.rid and book.bid='"+bid+"';";
         TempQueryDialog *tempquery = new TempQueryDialog(sql);
         tempquery->show();
     }
@@ -489,5 +490,17 @@ void AdminDialog::on_deleteBookBtn_clicked()
             QMessageBox::about(NULL,"提示","删除该书成功");
             initBookTableView();
         }
+    }
+}
+
+void AdminDialog::on_informationBtn_clicked()
+{
+    QSqlQuery query(Tool::getInstance()->getDb());
+    bool flag = query.exec("update information set content='"+ui->informationEdit->text()+"';");
+    if(flag)
+    {
+        QMessageBox::about(NULL,"提示","修改公告成功");
+    }else{
+        QMessageBox::about(NULL,"提示","修改失败");
     }
 }

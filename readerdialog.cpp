@@ -39,19 +39,21 @@ void ReaderDialog::initBookTableView()
 
 void ReaderDialog::initBorrowTableView()
 {
-    QSqlTableModel *model = new QSqlTableModel(this,Tool::getInstance()->getDb());
-    model->setTable("borrow");
-    model->setEditStrategy(QSqlTableModel::OnManualSubmit);
-    model->select(); //选取整个表的所有行
-    model->setFilter("isreturn=0 and rid='"+UsrInformation::getInstance()->id+"'");
-    model->removeColumn(model->columnCount()-1);
-    model->removeColumn(model->columnCount()-1);
-    model->removeColumn(2);
-    model->setHeaderData(0,Qt::Horizontal,"借书编号");
-    model->setHeaderData(1,Qt::Horizontal,"图书编号");
-    model->setHeaderData(2,Qt::Horizontal,"剩余续借次数");
-    model->setHeaderData(3,Qt::Horizontal,"借书日期");
-    model->setHeaderData(4,Qt::Horizontal,"应还时间");
+//    QSqlTableModel *model = new QSqlTableModel(this,Tool::getInstance()->getDb());
+//    model->setTable("borrow");
+//    model->setEditStrategy(QSqlTableModel::OnManualSubmit);
+//    model->select(); //选取整个表的所有行
+//    model->setFilter("isreturn=0 and rid='"+UsrInformation::getInstance()->id+"'");
+//    model->removeColumn(model->columnCount()-1);
+//    model->removeColumn(model->columnCount()-1);
+//    model->removeColumn(2);
+//    model->setHeaderData(0,Qt::Horizontal,"借书编号");
+//    model->setHeaderData(1,Qt::Horizontal,"图书编号");
+//    model->setHeaderData(2,Qt::Horizontal,"剩余续借次数");
+//    model->setHeaderData(3,Qt::Horizontal,"借书日期");
+//    model->setHeaderData(4,Qt::Horizontal,"应还时间");
+    QSqlQueryModel * model = new QSqlQueryModel;
+    model->setQuery("select borrow.boid as 借阅编号,book.bname as 书名,borrow.overbor 剩余续借,borrow.botime as 借书日期,borrow.retime as 应还时间 from borrow,book where borrow.bid=book.bid and isreturn=0 and rid='"+UsrInformation::getInstance()->id+"';");
     ui->tv2->setModel(model);
     ui->tv2->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }

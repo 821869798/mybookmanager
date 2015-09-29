@@ -29,7 +29,10 @@ void LoginDialog::init()
     ui->le2_2->setMaxLength(20);
     ui->le1_2->setMaxLength(10);
     connect(ui->exit_2,&QPushButton::clicked,this,&LoginDialog::on_exit_clicked);
-    logoStr1 = QStringLiteral("欢迎广大读者使用本管理系统");
+    QSqlQuery query(Tool::getInstance()->getDb());
+    query.exec("select content from information");
+    query.next();
+    logoStr1 = query.value(0).toString();
     QTimer *timer = new QTimer(this);
     connect(timer,&QTimer::timeout,this,&LoginDialog::scrollCaption);
     timer->start(500);

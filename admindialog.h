@@ -66,6 +66,8 @@ private slots:
 
     void on_deleteBookBtn_clicked();
 
+    void on_informationBtn_clicked();
+
 private:
     Ui::AdminDialog *ui;
     void init();
