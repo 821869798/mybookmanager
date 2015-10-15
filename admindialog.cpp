@@ -68,6 +68,9 @@ void AdminDialog::init()
         ui->readerUpgrade->setDisabled(true);
         ui->borrowAddBtn->setDisabled(true);
     }
+    ui->tv1->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->tv2->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->tv3->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->informationEdit->setMaxLength(50);
     ui->bidAdd->setDisabled(true);
     ui->bnumAdd->setValidator(new QIntValidator(0,1000,this));
@@ -308,7 +311,7 @@ void AdminDialog::on_bookReaderBtn_clicked()
     if(row>=0){
         QModelIndex index = ui->tv1->model()->index(row,0);
         QString bid = ui->tv1->model()->data(index).toString();
-        QString sql = "select reader.rid as 读者编号,reader.name as 读者姓名,reader.sex as性别,borrow.overbor as  续借次数 from reader,borrow,book where book.bid=borrow.bid and reader.rid=borrow.rid and book.bid='"+bid+"';";
+        QString sql = "select reader.rid as 读者编号,reader.name as 读者姓名,reader.sex as 性别,borrow.overbor as  续借次数 from reader,borrow,book where book.bid=borrow.bid and reader.rid=borrow.rid and borrow.isreturn=0 and book.bid='"+bid+"';";
         TempQueryDialog *tempquery = new TempQueryDialog(sql);
         tempquery->show();
     }

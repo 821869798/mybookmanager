@@ -77,6 +77,8 @@ void ReaderDialog::initReader()
 
 void ReaderDialog::init()
 {
+    ui->tv1->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->tv2->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->pwd1->setEchoMode(QLineEdit::Password);
     ui->pwd2->setEchoMode(QLineEdit::Password);
     ui->pwd3->setEchoMode(QLineEdit::Password);
